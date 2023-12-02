@@ -2,7 +2,6 @@ package com.example.demo.artifact;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.module.Module;
-import com.intellij.packaging.artifacts.ArtifactTemplate;
 import com.intellij.packaging.artifacts.ArtifactType;
 import com.intellij.packaging.elements.CompositePackagingElement;
 import com.intellij.packaging.elements.PackagingElementFactory;
@@ -15,6 +14,10 @@ import java.util.Collections;
 import java.util.List;
 
 public class MyArtifactType extends ArtifactType {
+
+    public static MyArtifactType getInstance() {
+        return EP_NAME.findExtension(MyArtifactType.class);
+    }
 
     public MyArtifactType() {
         super("MyArtifact", () -> "MyArtifact");
@@ -37,7 +40,7 @@ public class MyArtifactType extends ArtifactType {
 
     @NotNull
     @Override
-    public List<? extends ArtifactTemplate> getNewArtifactTemplates(@NotNull PackagingElementResolvingContext context) {
+    public List<MyFromModulesArtifactTemplate> getNewArtifactTemplates(@NotNull PackagingElementResolvingContext context) {
         return Collections.singletonList(new MyFromModulesArtifactTemplate(context, this));
     }
 

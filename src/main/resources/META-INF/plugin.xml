@@ -21,5 +21,7 @@
         <packaging.artifactType implementation="com.example.demo.artifact.MyArtifactType" />
         <packaging.elementType implementation="com.example.demo.artifact.facet.MyComplexPackagingElementType" />
         <packaging.sourceItemProvider implementation="com.example.demo.artifact.facet.MyFacetSourceItemsProvider" />
+
+        <compileServer.plugin classpath="demo-jps-plugin.jar" />
     </extensions>
 </idea-plugin>

@@ -6,3 +6,4 @@ pluginManagement {
 }
 
 rootProject.name = "demo-artifact"
+include("demo-jps-plugin")

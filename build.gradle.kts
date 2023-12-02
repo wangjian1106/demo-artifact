@@ -1,11 +1,12 @@
+import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 
 fun prop(key: String) = project.findProperty(key).toString()
 
 plugins {
     id("java")
-    id("org.jetbrains.intellij") version "1.15.0"
-    id("org.jetbrains.changelog") version "1.3.1"
+    id("org.jetbrains.intellij") version "1.16.1"
+    id("org.jetbrains.changelog") version "2.2.0"
 }
 
 group = prop("pluginGroup")
@@ -74,11 +75,11 @@ tasks {
         )
 
         // Get the latest available change notes from the changelog file
-//        changeNotes.set(provider {
-//            changelog.run {
-//                getOrNull(prop("pluginVersion")) ?: getLatest()
-//            }.toHTML()
-//        })
+        changeNotes.set(provider {
+            changelog.getAll().values.joinToString("\n") {
+                changelog.renderItem(it, Changelog.OutputType.HTML)
+            }
+        })
     }
 
     publishPlugin {
@@ -95,5 +96,19 @@ tasks {
 
     runPluginVerifier {
         ideVersions.set(prop("pluginVerifierIdeVersions").split(",").map { it.trim() }.toList())
+    }
+
+    prepareSandbox {
+        from("demo-jps-plugin/build/libs/demo-jps-plugin-$version.jar") {
+            into("${intellij.pluginName.get()}/lib/")
+            rename {
+                "demo-jps-plugin.jar"
+            }
+        }
+    }
+
+    val buildDebugPortKey = "compiler.process.debug.port"
+    runIde {
+        jvmArgs("-D$buildDebugPortKey=52474")
     }
 }

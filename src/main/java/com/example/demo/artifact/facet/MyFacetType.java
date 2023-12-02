@@ -43,7 +43,7 @@ public class MyFacetType extends FacetType<MyFacet, MyFacetConfiguration> {
     }
 
     @Override
-    public @Nullable Icon getIcon() {
+    public @NotNull Icon getIcon() {
         return PlatformIcons.LIBRARY_ICON;
     }
 }

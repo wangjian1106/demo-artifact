@@ -8,8 +8,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.packaging.artifacts.ArtifactType;
 import com.intellij.packaging.elements.ComplexPackagingElement;
 import com.intellij.packaging.elements.PackagingElement;
+import com.intellij.packaging.elements.PackagingElementFactory;
 import com.intellij.packaging.elements.PackagingElementResolvingContext;
-import com.intellij.packaging.impl.elements.DirectoryCopyPackagingElement;
 import com.intellij.packaging.impl.elements.FacetBasedPackagingElement;
 import com.intellij.packaging.ui.ArtifactEditorContext;
 import com.intellij.packaging.ui.PackagingElementPresentation;
@@ -26,7 +26,8 @@ public class MyComplexPackagingElement
 
     public static final String FACET_ATTRIBUTE = "facetId";
 
-    private String path;
+    private String relativePath;
+    private String resourceDirectory;
     private String facetId;
     private MyFacet myFacet;
     private FacetPointer<MyFacet> pointer;
@@ -39,14 +40,16 @@ public class MyComplexPackagingElement
     public MyComplexPackagingElement(MyFacet myFacet) {
         super(MyComplexPackagingElementType.getInstance());
         this.myFacet = myFacet;
-        this.path = myFacet.getPath();
+        this.relativePath = myFacet.getRelativePath();
+        this.resourceDirectory = myFacet.getResourceDirectory();
         this.pointer = FacetPointersManager.getInstance(myFacet.getModule().getProject()).create(myFacet);
         this.facetId = pointer.getId();
     }
 
     @Override
     public @Nullable List<? extends PackagingElement<?>> getSubstitution(@NotNull PackagingElementResolvingContext context, @NotNull ArtifactType artifactType) {
-        return Lists.newArrayList(new DirectoryCopyPackagingElement(path));
+        PackagingElementFactory factory = PackagingElementFactory.getInstance();
+        return Lists.newArrayList(factory.createDirectoryCopyWithParentDirectories(relativePath, resourceDirectory));
     }
 
     @Override
@@ -67,7 +70,7 @@ public class MyComplexPackagingElement
     public boolean isEqualTo(@NotNull PackagingElement<?> element) {
         if (element instanceof MyComplexPackagingElement) {
             MyComplexPackagingElement other = (MyComplexPackagingElement)element;
-            return Objects.equals(path, other.path) && Objects.equals(facetId, other.facetId);
+            return Objects.equals(resourceDirectory, other.resourceDirectory) && Objects.equals(facetId, other.facetId);
         }
         return false;
     }
@@ -82,8 +85,11 @@ public class MyComplexPackagingElement
         this.facetId = state.getFacetId();
         this.pointer = (this.facetId != null) ? FacetPointersManager.getInstance(this.myProject).create(this.facetId) : null;
         if (this.pointer != null) {
-            this.myFacet = Objects.requireNonNull(this.pointer.getFacet());
-            this.path = this.myFacet.getPath();
+            this.myFacet = this.pointer.getFacet();
+            if (this.myFacet != null) {
+                this.relativePath = myFacet.getRelativePath();
+                this.resourceDirectory = myFacet.getResourceDirectory();
+            }
         }
     }
 
